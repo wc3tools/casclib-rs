@@ -5,3 +5,4 @@ authors = ["Flux Xu <fluxxu@gmail.com>"]
 
 [dependencies]
 casclib-sys = { path = "casclib-sys" }
+log = "0.3.6"
