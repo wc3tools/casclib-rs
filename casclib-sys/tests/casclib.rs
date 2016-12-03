@@ -1,6 +1,6 @@
+extern crate libc;
 extern crate casclib_sys;
 
-extern crate libc;
 use libc::{uintptr_t, size_t, c_char};
 
 #[test]
@@ -22,13 +22,12 @@ fn test_bindings() {
         let mut info: u32 = 0;
         let mut needed: size_t = 0;
 
-        let result = casclib_sys::CascGetStorageInfo(
-            handle, 
-            casclib_sys::CASC_STORAGE_INFO_CLASS::CascStorageFileCount,
-            0 as *mut u8,
-            1,
-            &mut needed as *mut size_t
-        );
+        let result =
+            casclib_sys::CascGetStorageInfo(handle,
+                                         casclib_sys::CASC_STORAGE_INFO_CLASS::CascStorageFileCount,
+                                         0 as *mut u8,
+                                         1,
+                                         &mut needed as *mut size_t);
 
         assert_eq!(result, false);
         assert_eq!(info, 0);
@@ -40,13 +39,12 @@ fn test_bindings() {
         info = 0;
         needed = 0;
 
-        let result = casclib_sys::CascGetStorageInfo(
-            handle, 
-            casclib_sys::CASC_STORAGE_INFO_CLASS::CascStorageFileCount,
-            (&mut info as *mut u32) as *mut u8,
-            mem::size_of_val(&info),
-            &mut needed as *mut size_t
-        );
+        let result =
+            casclib_sys::CascGetStorageInfo(handle,
+                                         casclib_sys::CASC_STORAGE_INFO_CLASS::CascStorageFileCount,
+                                         (&mut info as *mut u32) as *mut u8,
+                                         mem::size_of_val(&info),
+                                         &mut needed as *mut size_t);
 
         assert_eq!(result, true);
         assert!(info > 0);

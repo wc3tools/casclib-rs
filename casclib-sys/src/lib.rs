@@ -1,11 +1,53 @@
 #![allow(non_camel_case_types, non_snake_case)]
 
 extern crate libc;
-use libc::{c_char, c_long, size_t, uintptr_t};
+#[macro_use]
+extern crate bitflags;
 
-pub mod defines;
+use libc::{c_char, c_long, size_t, uintptr_t, SEEK_SET, SEEK_CUR, SEEK_END};
 
+bitflags! {
+    pub flags Locale: u32 {
+        const ALL = 0xFFFFFFFF,
+        const NONE = 0x00000000,
+        const UNKNOWN1 = 0x00000001,
+        const ENUS = 0x00000002,
+        const KOKR = 0x00000004,
+        const RESERVED = 0x00000008,
+        const FRFR = 0x00000010,
+        const DEDE = 0x00000020,
+        const ZHCN = 0x00000040,
+        const ESES = 0x00000080,
+        const ZHTW = 0x00000100,
+        const ENGB = 0x00000200,
+        const ENCN = 0x00000400,
+        const ENTW = 0x00000800,
+        const ESMX = 0x00001000,
+        const RURU = 0x00002000,
+        const PTBR = 0x00004000,
+        const ITIT = 0x00008000,
+        const PTPT = 0x00010000,
+    }
+}
+
+bitflags! {
+    /// Flags for `File::open`
+    pub flags OpenFileFlags: u32 {
+        /// The name is just the encoding key; skip ROOT file processing
+        const OPEN_BY_ENCODING_KEY = 0x00000001,
+    }
+}
+
+const MD5_HASH_SIZE: usize = 0x10;
 const MAX_PATH: usize = 260;
+
+pub const FILE_BEGIN: i32 = SEEK_SET;
+pub const FILE_CURRENT: i32 = SEEK_CUR;
+pub const FILE_END: i32 = SEEK_END;
+
+// Return value for CascGetFileSize and CascSetFilePointer
+pub const CASC_INVALID_SIZE: u32 = 0xFFFFFFFF;
+pub const CASC_INVALID_POS: u32 = 0xFFFFFFFF;
 
 #[repr(C)]
 pub enum CASC_STORAGE_INFO_CLASS {
@@ -30,7 +72,7 @@ pub struct CASC_FIND_DATA {
     // Plain name of the found file
     pub szPlainName: *const c_char,
     // Encoding key
-    pub EncodingKey: [u8; defines::MD5_HASH_SIZE],
+    pub EncodingKey: [u8; MD5_HASH_SIZE],
     // Locale flags (WoW only)
     pub dwLocaleFlags: u32,
     // Size of the file
@@ -42,7 +84,7 @@ impl Default for CASC_FIND_DATA {
         CASC_FIND_DATA {
             szFileName: [0; MAX_PATH],
             szPlainName: 0 as *const c_char,
-            EncodingKey: [0; defines::MD5_HASH_SIZE],
+            EncodingKey: [0; MD5_HASH_SIZE],
             dwLocaleFlags: 0,
             dwFileSize: 0,
         }
@@ -50,8 +92,11 @@ impl Default for CASC_FIND_DATA {
 }
 
 pub const ERROR_INVALID_HANDLE: u32 = 6;
+pub const ERROR_NO_MORE_FILES: u32 = 18;
 pub const ERROR_INVALID_PARAMETER: u32 = 87;
 pub const ERROR_INSUFFICIENT_BUFFER: u32 = 122;
+
+pub type Handle = uintptr_t;
 
 extern "stdcall" {
     pub fn CascOpenStorage(szDataPath: *const c_char,
@@ -87,7 +132,7 @@ extern "stdcall" {
     pub fn CascSetFilePointer(hFile: uintptr_t,
                               lFilePos: c_long,
                               plFilePosHigh: *mut c_long,
-                              dwMoveMethod: u32)
+                              dwMoveMethod: i32)
                               -> u32;
     pub fn CascReadFile(hFile: uintptr_t,
                         lpBuffer: *mut u8,
