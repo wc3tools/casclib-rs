@@ -18,7 +18,7 @@ pub enum CascError {
     Io(io::Error),
     InvalidPath,
     InvalidFileName,
-    Code(u32),
+    Code(i32),
 }
 
 impl fmt::Display for CascError {
@@ -260,6 +260,10 @@ impl<'a> File<'a> {
     }
 
     pub fn extract<T: io::Write>(&self, mut w: T) -> Result<usize, CascError> {
+        unsafe {
+            casclib::SetLastError(0);
+        }
+
         let mut buffer: [u8; 0x1000] = [0; 0x1000];
         unsafe {
             let pos = casclib::CascSetFilePointer(self.handle, 0, 0 as *mut i32, casclib::FILE_BEGIN);
@@ -284,10 +288,10 @@ impl<'a> File<'a> {
             }
             match casclib::GetLastError() {
                 0 => Ok(bytes_write_total),
-                n => Err(
+                code => Err(
                     CascError::Io(
                         io::Error::new(
-                            io::ErrorKind::Other, format!("CascReadFile error: handle = {:#x}, bytes_write_total = {}, code = {}, path = {}", self.handle, bytes_write_total, n, self.entry.name)
+                            io::ErrorKind::Other, format!("CascReadFile error: code = {}, bytes_write_total = {}", code, bytes_write_total)
                         )
                     )
                 ),

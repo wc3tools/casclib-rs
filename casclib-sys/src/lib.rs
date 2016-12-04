@@ -91,10 +91,10 @@ impl Default for CASC_FIND_DATA {
     }
 }
 
-pub const ERROR_INVALID_HANDLE: u32 = 6;
-pub const ERROR_NO_MORE_FILES: u32 = 18;
-pub const ERROR_INVALID_PARAMETER: u32 = 87;
-pub const ERROR_INSUFFICIENT_BUFFER: u32 = 122;
+pub const ERROR_INVALID_HANDLE: i32 = 6;
+pub const ERROR_NO_MORE_FILES: i32 = 18;
+pub const ERROR_INVALID_PARAMETER: i32 = 87;
+pub const ERROR_INSUFFICIENT_BUFFER: i32 = 122;
 
 pub type Handle = uintptr_t;
 
@@ -149,5 +149,6 @@ extern "stdcall" {
                              -> uintptr_t;
     pub fn CascFindNextFile(hFind: uintptr_t, pFindData: *mut CASC_FIND_DATA) -> bool;
     pub fn CascFindClose(hFind: uintptr_t) -> bool;
-    pub fn GetLastError() -> u32;
+    pub fn GetLastError() -> i32;
+    pub fn SetLastError(code: i32);
 }
