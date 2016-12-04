@@ -111,6 +111,13 @@ impl Storage {
             storage: self,
         }
     }
+
+    pub fn entry<'a, T>(&'a self, name: T) -> FileEntry<'a> where T : Into<String> {
+        FileEntry {
+            storage: self,
+            name: name.into(),
+        }
+    }
 }
 
 pub struct Find<'a> {
@@ -267,13 +274,7 @@ impl<'a> File<'a> {
             while bytes_read != 0 {
                 let ok = casclib::CascReadFile(self.handle, &mut buffer[0] as *mut u8, mem::size_of_val(&buffer) as u32, &mut bytes_read as *mut u32);
                 if !ok {
-                    return Err(
-                        CascError::Io(
-                            io::Error::new(
-                                io::ErrorKind::Other, format!("CascReadFile error: {}", casclib::GetLastError())
-                            )
-                        )
-                    )
+                    break;
                 }
                 let end_pos = bytes_read as usize;
                 if bytes_read != 0 {
@@ -281,7 +282,16 @@ impl<'a> File<'a> {
                     bytes_write_total = bytes_write_total + end_pos;
                 }
             }
-            Ok(bytes_write_total)
+            match casclib::GetLastError() {
+                0 => Ok(bytes_write_total),
+                n => Err(
+                    CascError::Io(
+                        io::Error::new(
+                            io::ErrorKind::Other, format!("CascReadFile error: handle = {:#x}, bytes_write_total = {}, code = {}, path = {}", self.handle, bytes_write_total, n, self.entry.name)
+                        )
+                    )
+                ),
+            }
         }
     }
 }
