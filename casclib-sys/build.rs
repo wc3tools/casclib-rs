@@ -9,9 +9,7 @@ fn main() {
     println!("cargo:rerun-if-changed={}", casclib_path);
 
     // Builds CascLib using cmake
-    let dst = cmake::Config::new(&casclib_path)
-        .always_configure(true)
-        .build();
+    let dst = cmake::Config::new(&casclib_path).build();
 
     let lib = dst.join("lib");
 
