@@ -14,6 +14,7 @@ pub enum CascError {
     Io(io::Error),
     InvalidPath,
     InvalidFileName,
+    FileNotFound,
     Code(i32),
 }
 
@@ -23,6 +24,7 @@ impl fmt::Display for CascError {
             CascError::Io(ref err) => err.fmt(f),
             CascError::InvalidPath => write!(f, "Invalid storage path"),
             CascError::InvalidFileName => write!(f, "Invalid file name"),
+            CascError::FileNotFound => write!(f, "File not found"),
             CascError::Code(code) => write!(f, "Error code: {}", code),
         }
     }
@@ -45,7 +47,10 @@ pub fn open<P: AsRef<Path>>(path: P) -> Result<Storage, CascError> {
         let ok =
             casclib::CascOpenStorage(path_cstr.as_ptr(), 0, &mut handle as *mut casclib::Handle);
         if !ok {
-            return Err(CascError::Code(casclib::GetLastError()));
+            match casclib::GetLastError() {
+                casclib_sys::ERROR_FILE_NOT_FOUND => return Err(CascError::FileNotFound),
+                v => return Err(CascError::Code(v)),
+            }
         }
         handle
     };

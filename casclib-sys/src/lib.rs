@@ -91,6 +91,7 @@ impl Default for CASC_FIND_DATA {
     }
 }
 
+pub const ERROR_FILE_NOT_FOUND: i32 = 2;
 pub const ERROR_INVALID_HANDLE: i32 = 6;
 pub const ERROR_NO_MORE_FILES: i32 = 18;
 pub const ERROR_INVALID_PARAMETER: i32 = 87;
