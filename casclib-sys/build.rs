@@ -9,11 +9,12 @@ fn main() {
     println!("cargo:rerun-if-changed={}", casclib_path);
 
     // Builds CascLib using cmake
-    let mut dst = cmake::Config::new(&casclib_path)
-        .define("WITH_STATIC", "ON")
+    let dst = cmake::Config::new(&casclib_path)
+        .always_configure(true)
         .build();
-    dst.push("lib");
 
-    println!("cargo:rustc-link-search=native={}", dst.display());
-    println!("cargo:rustc-link-lib=static=casc");
+    let lib = dst.join("lib");
+
+    println!("cargo:rustc-link-search=native={}", lib.display());
+    println!("cargo:rustc-link-lib=casc");
 }
