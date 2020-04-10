@@ -18,6 +18,15 @@ pub enum CascError {
     Code(i32),
 }
 
+impl CascError {
+    unsafe fn from_last_error() -> Self {
+        match casclib::GetLastError() {
+            casclib_sys::ERROR_FILE_NOT_FOUND => CascError::FileNotFound,
+            v => CascError::Code(v),
+        }
+    }
+}
+
 impl fmt::Display for CascError {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match *self {
@@ -47,10 +56,7 @@ pub fn open<P: AsRef<Path>>(path: P) -> Result<Storage, CascError> {
         let ok =
             casclib::CascOpenStorage(path_cstr.as_ptr(), 0, &mut handle as *mut casclib::Handle);
         if !ok {
-            match casclib::GetLastError() {
-                casclib_sys::ERROR_FILE_NOT_FOUND => return Err(CascError::FileNotFound),
-                v => return Err(CascError::Code(v)),
-            }
+            return Err(CascError::from_last_error());
         }
         handle
     };
@@ -86,7 +92,7 @@ impl Storage {
                 0 as *mut usize,
             );
             if !ok {
-                return Err(CascError::Code(casclib::GetLastError()));
+                return Err(CascError::from_last_error());
             }
             Ok(count)
         }
@@ -213,7 +219,7 @@ impl<'a> FileEntry<'a> {
                 &mut file_handle as *mut casclib::Handle,
             );
             if !ok {
-                return Err(CascError::Code(casclib::GetLastError()));
+                return Err(CascError::from_last_error());
             }
         }
 
