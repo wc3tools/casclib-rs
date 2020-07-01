@@ -1,0 +1,9 @@
+[package]
+name = "casclib"
+version = "0.2.0"
+authors = ["Flux Xu <fluxxu@gmail.com>"]
+edition = "2018"
+
+[dependencies]
+casclib-sys = { path = "../casclib-sys" }
+log = "0.3.6"

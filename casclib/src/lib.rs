@@ -1,6 +1,5 @@
 extern crate casclib_sys as casclib;
 
-pub use casclib::{Locale, OpenFileFlags};
 use std::error;
 use std::ffi::{CStr, CString};
 use std::fmt;
@@ -9,6 +8,9 @@ use std::mem;
 use std::os::raw::c_char;
 use std::os::raw::c_long;
 use std::path::Path;
+use std::ptr;
+
+use casclib::HANDLE;
 
 #[derive(Debug)]
 pub enum CascError {
@@ -16,7 +18,7 @@ pub enum CascError {
     InvalidPath,
     InvalidFileName,
     FileNotFound,
-    Code(i32),
+    Code(casclib::ErrorCode),
 }
 
 impl CascError {
@@ -53,9 +55,8 @@ pub fn open<P: AsRef<Path>>(path: P) -> Result<Storage, CascError> {
     let path_str = path.as_ref().to_str().ok_or(CascError::InvalidPath)?;
     let path_cstr = CString::new(path_str).map_err(|_| CascError::InvalidPath)?;
     let handle = unsafe {
-        let mut handle: casclib::Handle = 0;
-        let ok =
-            casclib::CascOpenStorage(path_cstr.as_ptr(), 0, &mut handle as *mut casclib::Handle);
+        let mut handle: HANDLE = ptr::null_mut();
+        let ok = casclib::CascOpenStorage(path_cstr.as_ptr(), 0, &mut handle as *mut HANDLE);
         if !ok {
             return Err(CascError::from_last_error());
         }
@@ -69,7 +70,7 @@ pub fn open<P: AsRef<Path>>(path: P) -> Result<Storage, CascError> {
 }
 
 pub struct Storage {
-    handle: casclib::Handle,
+    handle: HANDLE,
     file_count: u32,
 }
 
@@ -82,15 +83,15 @@ impl Drop for Storage {
 }
 
 impl Storage {
-    fn read_file_count(handle: casclib::Handle) -> Result<u32, CascError> {
+    fn read_file_count(handle: HANDLE) -> Result<u32, CascError> {
         unsafe {
             let mut count: u32 = 0;
             let ok = casclib::CascGetStorageInfo(
                 handle,
-                casclib::CASC_STORAGE_INFO_CLASS::CascStorageFileCount,
-                (&mut count as *mut u32) as *mut u8,
-                mem::size_of_val(&count),
-                0 as *mut usize,
+                casclib::_CASC_STORAGE_INFO_CLASS_CascStorageTotalFileCount,
+                mem::transmute(&mut count as *mut u32),
+                4,
+                ptr::null_mut(),
             );
             if !ok {
                 return Err(CascError::from_last_error());
@@ -103,8 +104,23 @@ impl Storage {
         self.file_count
     }
 
-    pub fn files<'a>(&'a self) -> Find<'a> {
-        Find { storage: self }
+    pub fn files<'a, T>(&'a self) -> Find<'a>
+    where
+        T: AsRef<[u8]>,
+    {
+        self.files_with_mask("*")
+    }
+
+    pub fn files_with_mask<'a, T>(&'a self, mask: T) -> Find<'a>
+    where
+        T: AsRef<[u8]>,
+    {
+        Find {
+            mask: CString::new(mask.as_ref())
+                .ok()
+                .unwrap_or_else(|| CString::new("*").unwrap()),
+            storage: self,
+        }
     }
 
     pub fn entry<'a, T>(&'a self, name: T) -> FileEntry<'a>
@@ -119,6 +135,7 @@ impl Storage {
 }
 
 pub struct Find<'a> {
+    mask: CString,
     storage: &'a Storage,
 }
 
@@ -130,20 +147,20 @@ impl<'a> IntoIterator for Find<'a> {
         FindIterator {
             find: self,
             handle: None,
-            data: casclib::CASC_FIND_DATA::default(),
+            data: unsafe { std::mem::MaybeUninit::zeroed().assume_init() },
         }
     }
 }
 
 pub struct FindIterator<'a> {
     find: Find<'a>,
-    handle: Option<casclib::Handle>,
+    handle: Option<HANDLE>,
     data: casclib::CASC_FIND_DATA,
 }
 
 impl<'a> FindIterator<'a> {
     fn find_first<'b>(&'b mut self) -> Option<Result<FileEntry<'a>, CascError>> {
-        let mask = b"*\0".as_ptr() as *const i8;
+        let mask = self.find.mask.as_ptr() as *const i8;
         unsafe {
             let handle = casclib::CascFindFirstFile(
                 self.find.storage.handle,
@@ -151,7 +168,7 @@ impl<'a> FindIterator<'a> {
                 &mut self.data as *mut casclib::CASC_FIND_DATA,
                 0 as *const i8,
             );
-            if handle == 0 {
+            if handle == ptr::null_mut() {
                 let code = casclib::GetLastError();
                 if code == casclib::ERROR_NO_MORE_FILES {
                     return None;
@@ -209,15 +226,15 @@ impl<'a> FileEntry<'a> {
     }
 
     pub fn open(self) -> Result<File<'a>, CascError> {
-        let mut file_handle: casclib::Handle = 0;
+        let mut file_handle: HANDLE = ptr::null_mut();
         unsafe {
             let name = CString::new(&self.name[..]).map_err(|_| CascError::InvalidFileName)?;
             let ok = casclib::CascOpenFile(
                 self.storage.handle,
-                name.as_ptr(),
+                std::mem::transmute(name.as_ptr()),
                 0,
                 0,
-                &mut file_handle as *mut casclib::Handle,
+                &mut file_handle as *mut HANDLE,
             );
             if !ok {
                 return Err(CascError::from_last_error());
@@ -246,7 +263,7 @@ impl<'a> FileEntry<'a> {
 
 pub struct File<'a> {
     entry: FileEntry<'a>,
-    handle: casclib::Handle,
+    handle: HANDLE,
     size: u64,
 }
 
@@ -265,6 +282,13 @@ impl<'a> File<'a> {
 
     pub fn get_size(&self) -> u64 {
         self.size
+    }
+
+    pub fn read_all(&self) -> Result<Vec<u8>, CascError> {
+        let size = self.get_size();
+        let mut buf = Vec::with_capacity(size as usize);
+        self.extract(&mut buf)?;
+        Ok(buf)
     }
 
     pub fn extract<T: io::Write>(&self, mut w: T) -> Result<usize, CascError> {
@@ -287,7 +311,7 @@ impl<'a> File<'a> {
             while bytes_read != 0 {
                 let ok = casclib::CascReadFile(
                     self.handle,
-                    &mut buffer[0] as *mut u8,
+                    mem::transmute(&mut buffer[0] as *mut u8),
                     mem::size_of_val(&buffer) as u32,
                     &mut bytes_read as *mut u32,
                 );

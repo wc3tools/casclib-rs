@@ -1,9 +1,5 @@
-[package]
-name = "casclib"
-version = "0.1.0"
-authors = ["Flux Xu <fluxxu@gmail.com>"]
-edition = "2018"
-
-[dependencies]
-casclib-sys = { path = "casclib-sys" }
-log = "0.3.6"
+[workspace]
+members = [
+  "./casclib-sys",
+  "./casclib"
+]
