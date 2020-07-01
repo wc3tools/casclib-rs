@@ -81,6 +81,59 @@ where
         }
     }
 }
+pub const CASCLIB_VERSION: u32 = 512;
+pub const CASCLIB_VERSION_STRING: &'static [u8; 4usize] = b"2.0\0";
+pub const CASC_OPEN_BY_NAME: u32 = 0;
+pub const CASC_OPEN_BY_CKEY: u32 = 1;
+pub const CASC_OPEN_BY_EKEY: u32 = 2;
+pub const CASC_OPEN_BY_FILEID: u32 = 3;
+pub const CASC_OPEN_TYPE_MASK: u32 = 15;
+pub const CASC_OPEN_FLAGS_MASK: u32 = 4294967280;
+pub const CASC_STRICT_DATA_CHECK: u32 = 16;
+pub const CASC_OVERCOME_ENCRYPTED: u32 = 32;
+pub const CASC_LOCALE_ALL: u32 = 4294967295;
+pub const CASC_LOCALE_ALL_WOW: u32 = 127990;
+pub const CASC_LOCALE_NONE: u32 = 0;
+pub const CASC_LOCALE_UNKNOWN1: u32 = 1;
+pub const CASC_LOCALE_ENUS: u32 = 2;
+pub const CASC_LOCALE_KOKR: u32 = 4;
+pub const CASC_LOCALE_RESERVED: u32 = 8;
+pub const CASC_LOCALE_FRFR: u32 = 16;
+pub const CASC_LOCALE_DEDE: u32 = 32;
+pub const CASC_LOCALE_ZHCN: u32 = 64;
+pub const CASC_LOCALE_ESES: u32 = 128;
+pub const CASC_LOCALE_ZHTW: u32 = 256;
+pub const CASC_LOCALE_ENGB: u32 = 512;
+pub const CASC_LOCALE_ENCN: u32 = 1024;
+pub const CASC_LOCALE_ENTW: u32 = 2048;
+pub const CASC_LOCALE_ESMX: u32 = 4096;
+pub const CASC_LOCALE_RURU: u32 = 8192;
+pub const CASC_LOCALE_PTBR: u32 = 16384;
+pub const CASC_LOCALE_ITIT: u32 = 32768;
+pub const CASC_LOCALE_PTPT: u32 = 65536;
+pub const CASC_CFLAG_LOAD_ON_WINDOWS: u32 = 8;
+pub const CASC_CFLAG_LOAD_ON_MAC: u32 = 16;
+pub const CASC_CFLAG_LOW_VIOLENCE: u32 = 128;
+pub const CASC_CFLAG_DONT_LOAD: u32 = 256;
+pub const CASC_CFLAG_NO_NAME_HASH: u32 = 268435456;
+pub const CASC_CFLAG_BUNDLE: u32 = 1073741824;
+pub const CASC_CFLAG_NO_COMPRESSION: u32 = 2147483648;
+pub const CASC_INVALID_INDEX: u32 = 4294967295;
+pub const CASC_INVALID_SIZE: u32 = 4294967295;
+pub const CASC_INVALID_POS: u32 = 4294967295;
+pub const CASC_INVALID_ID: u32 = 4294967295;
+pub const CASC_INVALID_OFFS64: i32 = -1;
+pub const CASC_INVALID_SIZE64: i32 = -1;
+pub const CASC_FEATURE_FILE_NAMES: u32 = 1;
+pub const CASC_FEATURE_ROOT_CKEY: u32 = 2;
+pub const CASC_FEATURE_TAGS: u32 = 4;
+pub const CASC_FEATURE_FNAME_HASHES: u32 = 8;
+pub const CASC_FEATURE_FNAME_HASHES_OPTIONAL: u32 = 16;
+pub const CASC_FEATURE_FILE_DATA_IDS: u32 = 32;
+pub const CASC_FEATURE_LOCALE_FLAGS: u32 = 64;
+pub const CASC_FEATURE_CONTENT_FLAGS: u32 = 128;
+pub const CASC_FEATURE_ONLINE: u32 = 256;
+pub const CASC_KEY_LENGTH: u32 = 16;
 pub type __darwin_size_t = ::std::os::raw::c_ulong;
 #[repr(C)]
 #[derive(Copy, Clone)]
