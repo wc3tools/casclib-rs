@@ -6,7 +6,6 @@ use std::fmt;
 use std::io;
 use std::mem;
 use std::os::raw::c_char;
-use std::os::raw::c_long;
 use std::path::Path;
 use std::ptr;
 
@@ -298,8 +297,12 @@ impl<'a> File<'a> {
 
         let mut buffer: [u8; 0x1000] = [0; 0x1000];
         unsafe {
-            let pos =
-                casclib::CascSetFilePointer(self.handle, 0, 0 as *mut c_long, casclib::FILE_BEGIN);
+            let pos = casclib::CascSetFilePointer(
+                self.handle,
+                0,
+                0 as *mut casclib::LONG,
+                casclib::FILE_BEGIN as casclib::DWORD,
+            );
             if pos == casclib::CASC_INVALID_POS {
                 return Err(CascError::Code(casclib::GetLastError()));
             }
