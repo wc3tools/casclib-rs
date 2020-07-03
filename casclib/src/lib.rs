@@ -68,6 +68,7 @@ pub fn open<P: AsRef<Path>>(path: P) -> Result<Storage, CascError> {
     })
 }
 
+#[derive(Debug)]
 pub struct Storage {
     handle: HANDLE,
     file_count: u32,
@@ -99,7 +100,7 @@ impl Storage {
         }
     }
 
-    pub fn get_file_count(&self) -> u32 {
+    pub fn file_count(&self) -> u32 {
         self.file_count
     }
 
@@ -133,6 +134,7 @@ impl Storage {
     }
 }
 
+#[derive(Debug)]
 pub struct Find<'a> {
     mask: CString,
     storage: &'a Storage,
@@ -155,6 +157,15 @@ pub struct FindIterator<'a> {
     find: Find<'a>,
     handle: Option<HANDLE>,
     data: casclib::CASC_FIND_DATA,
+}
+
+impl<'a> fmt::Debug for FindIterator<'a> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("FindIterator")
+            .field("find", &self.find)
+            .field("handle", &self.handle)
+            .finish()
+    }
 }
 
 impl<'a> FindIterator<'a> {
@@ -211,6 +222,7 @@ impl<'a> Iterator for FindIterator<'a> {
     }
 }
 
+#[derive(Debug)]
 pub struct FileEntry<'a> {
     storage: &'a Storage,
     name: String,
