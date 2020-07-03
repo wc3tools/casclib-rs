@@ -4,7 +4,7 @@ use std::env;
 
 fn main() {
     // Gets CacsLib source path from env CASCLIB_DIR
-    let casclib_path = env::var("CASCLIB_DIR").unwrap_or("CascLib".to_string());
+    let casclib_path = env::var("CASCLIB_DIR").unwrap_or("../deps/CascLib".to_string());
 
     println!("cargo:rerun-if-changed={}", casclib_path);
 
