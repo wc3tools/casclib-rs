@@ -1,6 +1,6 @@
-cp casclib-sys/CascLib/src/CascLib.h casclib-sys/CascLib/src/CascLib.hpp && \
-bindgen casclib-sys/CascLib/src/CascLib.hpp -o bindings.rs \
+cp deps/CascLib/src/CascLib.h deps/CascLib/src/CascLib.hpp && \
+bindgen deps/CascLib/src/CascLib.hpp -o casclib-sys/src/bindings.rs \
   --whitelist-function "^Casc.+" \
-  --blacklist-function "SetLastError" \
-  --whitelist-type "^CASC.+" &&\
-  rm casclib-sys/CascLib/src/CascLib.hpp
+  --whitelist-type "^CASC.+" \
+  --whitelist-var "^CASC.+" &&\
+  rm deps/CascLib/src/CascLib.hpp

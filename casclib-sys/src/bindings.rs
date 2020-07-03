@@ -1114,6 +1114,12 @@ extern "C" {
     pub fn CascAddStringEncryptionKey(hStorage: HANDLE, KeyName: ULONGLONG, szKey: LPCSTR) -> bool;
 }
 extern "C" {
+    pub fn CascImportKeysFromString(hStorage: HANDLE, szKeyList: LPCSTR) -> bool;
+}
+extern "C" {
+    pub fn CascImportKeysFromFile(hStorage: HANDLE, szFileName: LPCTSTR) -> bool;
+}
+extern "C" {
     pub fn CascFindEncryptionKey(hStorage: HANDLE, KeyName: ULONGLONG) -> LPBYTE;
 }
 extern "C" {
