@@ -74,6 +74,9 @@ pub struct Storage {
     file_count: u32,
 }
 
+// https://github.com/ladislav-zezula/CascLib/issues/172#issuecomment-556076211
+unsafe impl Send for Storage {}
+
 impl Drop for Storage {
     fn drop(&mut self) {
         unsafe {
