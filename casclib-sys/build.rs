@@ -24,14 +24,15 @@ fn main() {
 
     let lib = dst.join("lib");
 
+    println!("cargo:rustc-link-search=native={}", lib.display());
+    println!("cargo:rustc-link-lib=static=casc");
+
     let target = env::var("TARGET").unwrap();
     if target.contains("apple") {
         println!("cargo:rustc-link-lib=dylib=c++");
         println!("cargo:rustc-link-lib=z");
     } else if target.contains("linux") {
-        println!("cargo:rustc-link-lib=dylib=stdc++");
+        println!("cargo:rustc-link-lib=stdc++");
+        println!("cargo:rustc-link-lib=z");
     }
-
-    println!("cargo:rustc-link-search=native={}", lib.display());
-    println!("cargo:rustc-link-lib=static=casc");
 }

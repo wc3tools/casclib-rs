@@ -30,6 +30,7 @@ fn test_read_unicode() {
 
     let storage = casclib::open(OsString::from_wide(&U16CString::from_str(r#"C:\Program Files (x86)\Warcraft III中文\Data"#).unwrap().into_vec())).unwrap();
     let count = storage.file_count();
+
     assert!(count > 0);
 
     let mut walked = 0;

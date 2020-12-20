@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies]
 casclib-sys = { path = "../casclib-sys" }
-log = "0.3.6"
+log = "0.4"
 
 [target.'cfg(windows)'.dependencies]
 widestring = "0.4"
