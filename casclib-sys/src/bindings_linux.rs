@@ -81,6 +81,33 @@ where
         }
     }
 }
+pub const FILE_BEGIN: u32 = 0;
+pub const FILE_CURRENT: u32 = 1;
+pub const FILE_END: u32 = 2;
+pub const ERROR_SUCCESS: u32 = 0;
+pub const ERROR_FILE_NOT_FOUND: u32 = 2;
+pub const ERROR_PATH_NOT_FOUND: u32 = 2;
+pub const ERROR_ACCESS_DENIED: u32 = 1;
+pub const ERROR_INVALID_HANDLE: u32 = 9;
+pub const ERROR_NOT_ENOUGH_MEMORY: u32 = 12;
+pub const ERROR_NOT_SUPPORTED: u32 = 95;
+pub const ERROR_INVALID_PARAMETER: u32 = 22;
+pub const ERROR_DISK_FULL: u32 = 28;
+pub const ERROR_ALREADY_EXISTS: u32 = 17;
+pub const ERROR_INSUFFICIENT_BUFFER: u32 = 105;
+pub const ERROR_BAD_FORMAT: u32 = 1000;
+pub const ERROR_NO_MORE_FILES: u32 = 1001;
+pub const ERROR_HANDLE_EOF: u32 = 1002;
+pub const ERROR_CAN_NOT_COMPLETE: u32 = 1003;
+pub const ERROR_FILE_CORRUPT: u32 = 1004;
+pub const ERROR_FILE_ENCRYPTED: u32 = 1005;
+pub const ERROR_FILE_TOO_LARGE: u32 = 1006;
+pub const ERROR_ARITHMETIC_OVERFLOW: u32 = 1007;
+pub const ERROR_FILE_INCOMPLETE: u32 = 1006;
+pub const ERROR_FILE_OFFLINE: u32 = 1007;
+pub const ERROR_BUFFER_OVERFLOW: u32 = 1008;
+pub const ERROR_CANCELLED: u32 = 1009;
+pub const ERROR_INDEX_PARSING_DONE: u32 = 1010;
 pub const CASCLIB_VERSION: u32 = 512;
 pub const CASCLIB_VERSION_STRING: &'static [u8; 4usize] = b"2.0\0";
 pub const CASC_OPEN_BY_NAME: u32 = 0;
