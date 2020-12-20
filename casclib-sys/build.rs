@@ -8,8 +8,16 @@ fn main() {
 
     println!("cargo:rerun-if-changed={}", casclib_path);
 
+    let mut cfg = cmake::Config::new(&casclib_path);
+
+    #[cfg(target_os = "windows")]
+    {
+      cfg.cxxflag("-D UNICODE")
+        .cxxflag("-D _UNICODE");
+    }
+
     // Builds CascLib using cmake
-    let dst = cmake::Config::new(&casclib_path)
+    let dst = cfg
         .define("CASC_BUILD_SHARED_LIB", "OFF")
         .define("CASC_BUILD_STATIC_LIB", "ON")
         .build();

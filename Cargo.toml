@@ -1,5 +1,6 @@
 [workspace]
 members = [
+  "./casclib-bindgen",
   "./casclib-sys",
   "./casclib"
 ]

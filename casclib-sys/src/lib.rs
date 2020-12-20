@@ -44,11 +44,9 @@ mod platform {
 
 pub use platform::*;
 
-include!("./bindings.rs");
-
-extern "C" {
-    pub fn SetLastError(dwErrCode: ErrorCode);
-}
-extern "C" {
-    pub fn GetLastError() -> ErrorCode;
-}
+#[cfg(target_os = "windows")]
+include!("./bindings_windows.rs");
+#[cfg(target_os = "linux")]
+include!("./bindings_linux.rs");
+#[cfg(target_os = "macos")]
+include!("./bindings_macos.rs");

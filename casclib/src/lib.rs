@@ -17,12 +17,14 @@ pub enum CascError {
     InvalidPath,
     InvalidFileName,
     FileNotFound,
+    #[cfg(not(target_os = "windows"))]
+    NonUtf8,
     Code(casclib::ErrorCode),
 }
 
 impl CascError {
     unsafe fn from_last_error() -> Self {
-        match casclib::GetLastError() {
+        match casclib::GetCascError() {
             casclib_sys::ERROR_FILE_NOT_FOUND => CascError::FileNotFound,
             v => CascError::Code(v),
         }
@@ -36,6 +38,8 @@ impl fmt::Display for CascError {
             CascError::InvalidPath => write!(f, "Invalid storage path"),
             CascError::InvalidFileName => write!(f, "Invalid file name"),
             CascError::FileNotFound => write!(f, "File not found"),
+            #[cfg(not(target_os = "windows"))]
+            CascError::NonUtf8 => write!(f, "Non-utf-8 encoding is not supported"),
             CascError::Code(code) => write!(f, "Error code: {}", code),
         }
     }
@@ -51,11 +55,19 @@ impl error::Error for CascError {
 }
 
 pub fn open<P: AsRef<Path>>(path: P) -> Result<Storage, CascError> {
-    let path_str = path.as_ref().to_str().ok_or(CascError::InvalidPath)?;
-    let path_cstr = CString::new(path_str).map_err(|_| CascError::InvalidPath)?;
+    #[cfg(not(target_os = "windows"))]
+      let cpath = {
+        let pathstr = path.as_ref().to_str().ok_or_else(|| CascError::NonUtf8)?;
+        CString::new(pathstr)?
+    };
+    #[cfg(target_os = "windows")]
+      let cpath = {
+        use widestring::U16CString;
+        U16CString::from_os_str(path.as_ref()).map_err(|_| CascError::InvalidPath)?.into_vec()
+    };
     let handle = unsafe {
         let mut handle: HANDLE = ptr::null_mut();
-        let ok = casclib::CascOpenStorage(path_cstr.as_ptr(), 0, &mut handle as *mut HANDLE);
+        let ok = casclib::CascOpenStorage(cpath.as_ptr(), 0, &mut handle as *mut HANDLE);
         if !ok {
             return Err(CascError::from_last_error());
         }
@@ -179,10 +191,10 @@ impl<'a> FindIterator<'a> {
                 self.find.storage.handle,
                 mask,
                 &mut self.data as *mut casclib::CASC_FIND_DATA,
-                0 as *const i8,
+                ptr::null(),
             );
             if handle == ptr::null_mut() {
-                let code = casclib::GetLastError();
+                let code = casclib::GetCascError();
                 if code == casclib::ERROR_NO_MORE_FILES {
                     return None;
                 } else {
@@ -307,7 +319,7 @@ impl<'a> File<'a> {
 
     pub fn extract<T: io::Write>(&self, mut w: T) -> Result<usize, CascError> {
         unsafe {
-            casclib::SetLastError(0);
+            casclib::SetCascError(0);
         }
 
         let mut buffer: [u8; 0x1000] = [0; 0x1000];
@@ -319,7 +331,7 @@ impl<'a> File<'a> {
                 casclib::FILE_BEGIN as casclib::DWORD,
             );
             if pos == casclib::CASC_INVALID_POS {
-                return Err(CascError::Code(casclib::GetLastError()));
+                return Err(CascError::Code(casclib::GetCascError()));
             }
         }
 
@@ -343,7 +355,7 @@ impl<'a> File<'a> {
                     bytes_write_total = bytes_write_total + end_pos;
                 }
             }
-            match casclib::GetLastError() {
+            match casclib::GetCascError() {
                 0 => Ok(bytes_write_total),
                 code => Err(CascError::Io(io::Error::new(
                     io::ErrorKind::Other,
