@@ -58,7 +58,7 @@ pub fn open<P: AsRef<Path>>(path: P) -> Result<Storage, CascError> {
     #[cfg(not(target_os = "windows"))]
       let cpath = {
         let pathstr = path.as_ref().to_str().ok_or_else(|| CascError::NonUtf8)?;
-        CString::new(pathstr)?
+        CString::new(pathstr).map_err(|_| CascError::InvalidPath)?
     };
     #[cfg(target_os = "windows")]
       let cpath = {
