@@ -16,7 +16,11 @@ fn main() {
     .whitelist_function("^Casc.+")
     .whitelist_function("SetCascError")
     .whitelist_function("GetCascError")
-    .whitelist_var("^CASC.+");
+    .whitelist_var("^CASC.+")
+    .whitelist_var("^ERROR_.+")
+    .whitelist_var("FILE_BEGIN")
+    .whitelist_var("FILE_CURRENT")
+    .whitelist_var("FILE_END");
 
   let bindings = bindings
     // Finish the builder and generate the bindings.
