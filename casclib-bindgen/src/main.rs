@@ -12,15 +12,15 @@ fn main() {
     // Tell cargo to invalidate the built crate whenever any of the
     // included header files changed.
     .parse_callbacks(Box::new(bindgen::CargoCallbacks))
-    .whitelist_type("^CASC.+")
-    .whitelist_function("^Casc.+")
-    .whitelist_function("SetCascError")
-    .whitelist_function("GetCascError")
-    .whitelist_var("^CASC.+")
-    .whitelist_var("^ERROR_.+")
-    .whitelist_var("FILE_BEGIN")
-    .whitelist_var("FILE_CURRENT")
-    .whitelist_var("FILE_END");
+    .allowlist_type("^CASC.+")
+    .allowlist_function("^Casc.+")
+    .allowlist_function("SetCascError")
+    .allowlist_function("GetCascError")
+    .allowlist_var("^CASC.+")
+    .allowlist_var("^ERROR_.+")
+    .allowlist_var("FILE_BEGIN")
+    .allowlist_var("FILE_CURRENT")
+    .allowlist_var("FILE_END");
 
   let bindings = bindings
     // Finish the builder and generate the bindings.

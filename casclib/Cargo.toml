@@ -9,4 +9,4 @@ casclib-sys = { path = "../casclib-sys" }
 log = "0.4"
 
 [target.'cfg(windows)'.dependencies]
-widestring = "0.4"
+widestring = "1.0"

@@ -57,7 +57,7 @@ impl error::Error for CascError {
 pub fn open<P: AsRef<Path>>(path: P) -> Result<Storage, CascError> {
     #[cfg(not(target_os = "windows"))]
       let cpath = {
-        let pathstr = path.as_ref().to_str().ok_or_else(|| CascError::NonUtf8)?;
+        let pathstr = path.as_ref().to_str().ok_or(CascError::NonUtf8)?;
         CString::new(pathstr).map_err(|_| CascError::InvalidPath)?
     };
     #[cfg(target_os = "windows")]
@@ -119,14 +119,14 @@ impl Storage {
         self.file_count
     }
 
-    pub fn files<'a, T>(&'a self) -> Find<'a>
+    pub fn files<T>(&self) -> Find
     where
         T: AsRef<[u8]>,
     {
         self.files_with_mask("*")
     }
 
-    pub fn files_with_mask<'a, T>(&'a self, mask: T) -> Find<'a>
+    pub fn files_with_mask<T>(&self, mask: T) -> Find
     where
         T: AsRef<[u8]>,
     {
@@ -138,7 +138,7 @@ impl Storage {
         }
     }
 
-    pub fn entry<'a, T>(&'a self, name: T) -> FileEntry<'a>
+    pub fn entry<T>(&self, name: T) -> FileEntry
     where
         T: Into<String>,
     {
@@ -193,7 +193,7 @@ impl<'a> FindIterator<'a> {
                 &mut self.data as *mut casclib::CASC_FIND_DATA,
                 ptr::null(),
             );
-            if handle == ptr::null_mut() {
+            if handle.is_null() {
                 let code = casclib::GetCascError();
                 if code == casclib::ERROR_NO_MORE_FILES {
                     return None;
@@ -219,7 +219,7 @@ impl<'a> FindIterator<'a> {
 impl<'a> Iterator for FindIterator<'a> {
     type Item = Result<FileEntry<'a>, CascError>;
 
-    fn next<'b>(&'b mut self) -> Option<Self::Item> {
+    fn next(&mut self) -> Option<Self::Item> {
         match self.handle {
             None => self.find_first(),
             Some(handle) => unsafe {
@@ -327,7 +327,7 @@ impl<'a> File<'a> {
             let pos = casclib::CascSetFilePointer(
                 self.handle,
                 0,
-                0 as *mut casclib::LONG,
+                std::ptr::null_mut::<casclib::LONG>(),
                 casclib::FILE_BEGIN as casclib::DWORD,
             );
             if pos == casclib::CASC_INVALID_POS {
@@ -351,8 +351,8 @@ impl<'a> File<'a> {
                 let end_pos = bytes_read as usize;
                 if bytes_read != 0 {
                     w.write_all(&buffer[0..end_pos])
-                        .map_err(|e| CascError::Io(e))?;
-                    bytes_write_total = bytes_write_total + end_pos;
+                        .map_err(CascError::Io)?;
+                    bytes_write_total += end_pos;
                 }
             }
             match casclib::GetCascError() {

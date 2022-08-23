@@ -109,7 +109,7 @@ pub const ERROR_BUFFER_OVERFLOW: u32 = 1008;
 pub const ERROR_CANCELLED: u32 = 1009;
 pub const ERROR_INDEX_PARSING_DONE: u32 = 1010;
 pub const CASCLIB_VERSION: u32 = 512;
-pub const CASCLIB_VERSION_STRING: &'static [u8; 4usize] = b"2.0\0";
+pub const CASCLIB_VERSION_STRING: &[u8; 4usize] = b"2.0\0";
 pub const CASC_OPEN_BY_NAME: u32 = 0;
 pub const CASC_OPEN_BY_CKEY: u32 = 1;
 pub const CASC_OPEN_BY_EKEY: u32 = 2;
@@ -536,21 +536,17 @@ fn bindgen_test_layout__CASC_FIND_DATA() {
 impl _CASC_FIND_DATA {
     #[inline]
     pub fn bFileAvailable(&self) -> DWORD {
-        unsafe { ::std::mem::transmute(self._bitfield_1.get(0usize, 1u8) as u32) }
+        self._bitfield_1.get(0usize, 1u8) as u32
     }
     #[inline]
     pub fn set_bFileAvailable(&mut self, val: DWORD) {
-        unsafe {
-            let val: u32 = ::std::mem::transmute(val);
-            self._bitfield_1.set(0usize, 1u8, val as u64)
-        }
+        self._bitfield_1.set(0usize, 1u8, val as u64)
     }
     #[inline]
     pub fn new_bitfield_1(bFileAvailable: DWORD) -> __BindgenBitfieldUnit<[u8; 1usize], u8> {
         let mut __bindgen_bitfield_unit: __BindgenBitfieldUnit<[u8; 1usize], u8> =
             Default::default();
         __bindgen_bitfield_unit.set(0usize, 1u8, {
-            let bFileAvailable: u32 = unsafe { ::std::mem::transmute(bFileAvailable) };
             bFileAvailable as u64
         });
         __bindgen_bitfield_unit
